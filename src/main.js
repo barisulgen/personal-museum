@@ -32,6 +32,7 @@ const player = new PlayerController(camera, canvas);
 let collisionCheck = null;
 let inTour = false;
 let museumGroup = null;
+let objectUrls = [];
 
 // Clock
 const clock = new THREE.Clock();
@@ -51,18 +52,37 @@ async function init() {
 async function startTour() {
   hideOverlay();
 
-  // Build museum
+  // Clean up previous museum
   if (museumGroup) {
     scene.remove(museumGroup);
+    museumGroup.traverse((child) => {
+      if (child.isMesh) {
+        child.geometry?.dispose();
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach((m) => { m.map?.dispose(); m.dispose(); });
+          } else {
+            child.material.map?.dispose();
+            child.material.dispose();
+          }
+        }
+      }
+    });
+    objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    objectUrls = [];
   }
+
+  // Build museum
   const result = await buildMuseum();
   museumGroup = result.museumGroup;
+  objectUrls = result.objectUrls;
   scene.add(museumGroup);
   collisionCheck = createCollisionChecker(result.collisionMeshes);
 
   // Reset player to foyer center
   camera.position.set(0, 1.6, 0);
   camera.rotation.set(0, 0, 0);
+  player.euler.set(0, 0, 0, 'YXZ');
 
   // Fullscreen + pointer lock
   try {
@@ -80,6 +100,9 @@ function exitTour() {
   if (document.fullscreenElement) {
     document.exitFullscreen().catch(() => {});
   }
+  // Revoke object URLs to free memory
+  objectUrls.forEach((url) => URL.revokeObjectURL(url));
+  objectUrls = [];
   showOverlay();
 }
 

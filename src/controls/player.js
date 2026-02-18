@@ -111,17 +111,19 @@ export class PlayerController {
     if (!collisionCheck || !collisionCheck(newPos)) {
       this.camera.position.copy(newPos);
     } else {
+      const originalPos = this.camera.position.clone();
       // Try sliding along X only
-      const slideX = this.camera.position.clone();
+      const slideX = originalPos.clone();
       slideX.x = newPos.x;
       if (!collisionCheck(slideX)) {
         this.camera.position.copy(slideX);
-      }
-      // Try sliding along Z only
-      const slideZ = this.camera.position.clone();
-      slideZ.z = newPos.z;
-      if (!collisionCheck(slideZ)) {
-        this.camera.position.copy(slideZ);
+      } else {
+        // Try sliding along Z only
+        const slideZ = originalPos.clone();
+        slideZ.z = newPos.z;
+        if (!collisionCheck(slideZ)) {
+          this.camera.position.copy(slideZ);
+        }
       }
     }
   }

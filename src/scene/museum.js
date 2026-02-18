@@ -8,13 +8,14 @@ import { getAllPhotos } from '../storage/db.js';
 
 /**
  * Build the entire museum scene.
- * @returns {{ museumGroup: THREE.Group, collisionMeshes: THREE.Mesh[] }}
+ * @returns {{ museumGroup: THREE.Group, collisionMeshes: THREE.Mesh[], objectUrls: string[] }}
  */
 export async function buildMuseum() {
   const photos = await getAllPhotos();
   const layout = computeLayout(photos.length);
   const museumGroup = new THREE.Group();
   const collisionMeshes = [];
+  const objectUrls = [];
 
   // Ambient lighting
   createAmbientLighting(museumGroup);
@@ -61,6 +62,7 @@ export async function buildMuseum() {
 
         const photo = photos[photoIndex];
         const url = URL.createObjectURL(photo.blob);
+        objectUrls.push(url);
         const frame = createFrame({
           textureUrl: url,
           photoWidth: photo.width,
@@ -88,9 +90,8 @@ export async function buildMuseum() {
 
         group.add(frame);
 
-        // Spotlight for this frame
-        const worldFramePos = framePos.clone().add(group.position);
-        const spotlight = createFrameSpotlight(worldFramePos, ws.wall, roomDesc.height);
+        // Spotlight for this frame (use local coords since spotlight is added to group)
+        const spotlight = createFrameSpotlight(framePos.clone(), ws.wall, roomDesc.height);
         group.add(spotlight);
         group.add(spotlight.target);
 
@@ -107,5 +108,5 @@ export async function buildMuseum() {
     museumGroup.add(group);
   }
 
-  return { museumGroup, collisionMeshes };
+  return { museumGroup, collisionMeshes, objectUrls };
 }
