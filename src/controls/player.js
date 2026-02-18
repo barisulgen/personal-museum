@@ -99,9 +99,9 @@ export class PlayerController {
     const sin = Math.sin(yaw);
     const cos = Math.cos(yaw);
     const worldDir = new THREE.Vector3(
-      this.direction.x * cos - this.direction.z * sin,
+      this.direction.x * cos + this.direction.z * sin,
       0,
-      this.direction.x * sin + this.direction.z * cos
+      -this.direction.x * sin + this.direction.z * cos
     );
 
     const step = worldDir.multiplyScalar(MOVE_SPEED * delta);

@@ -1,12 +1,12 @@
-const GALLERY_WIDTH = 10;
-const GALLERY_DEPTH = 8;
-const GALLERY_HEIGHT = 4;
-const FOYER_WIDTH = 14;
-const FOYER_DEPTH = 12;
-const FOYER_HEIGHT = 6;
+const GALLERY_WIDTH = 14;
+const GALLERY_DEPTH = 11;
+const GALLERY_HEIGHT = 7;
+const FOYER_WIDTH = 18;
+const FOYER_DEPTH = 14;
+const FOYER_HEIGHT = 9;
 const FRAMES_PER_ROOM = 8;
-const DOORWAY_WIDTH = 2.4;
-const DOORWAY_HEIGHT = 2.8;
+const DOORWAY_WIDTH = 2.8;
+const DOORWAY_HEIGHT = 3.8;
 
 /**
  * Return the opposite wall name.

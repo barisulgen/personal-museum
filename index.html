@@ -101,11 +101,56 @@
 
     /* Hidden file input */
     #file-input { display: none; }
+
+    /* Loading screen */
+    #loading {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 20;
+      background: rgba(10, 8, 6, 0.92);
+      font-family: 'Georgia', 'Times New Roman', serif;
+      color: #e0d6c8;
+    }
+    #loading.visible { display: flex; }
+    #loading .loading-title {
+      font-size: 14px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #a09080;
+      margin-bottom: 32px;
+    }
+    #loading .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 2px solid rgba(180, 160, 130, 0.2);
+      border-top-color: rgba(180, 160, 130, 0.8);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    #loading .loading-status {
+      margin-top: 24px;
+      font-size: 13px;
+      letter-spacing: 1px;
+      color: #a09080;
+    }
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
   <div id="overlay"></div>
+  <div id="loading">
+    <p class="loading-title">Preparing Your Exhibition</p>
+    <div class="loading-spinner"></div>
+    <p class="loading-status">Building gallery rooms...</p>
+  </div>
   <audio id="bg-music" preload="auto"></audio>
   <script type="module" src="/src/main.js"></script>
 </body>

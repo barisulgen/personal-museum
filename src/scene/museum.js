@@ -49,13 +49,15 @@ export async function buildMuseum() {
     group.position.set(roomDesc.position.x, 0, roomDesc.position.z);
 
     // Place photo frames on wall segments
-    const frameable = wallSegments.filter((ws) => ws.segWidth >= 2.2);
+    const frameable = wallSegments.filter((ws) => ws.segWidth >= 3.0);
     let framesPlaced = 0;
 
     for (const ws of frameable) {
       if (framesPlaced >= roomDesc.photoSlots || photoIndex >= photos.length) break;
 
-      const framesOnWall = ws.segWidth >= 5 ? 2 : 1;
+      // Wide walls get 2 standard paintings; narrower walls get 1 large feature painting
+      const isFeatureWall = ws.segWidth < 8;
+      const framesOnWall = (!isFeatureWall && ws.segWidth >= 8) ? 2 : 1;
 
       for (let f = 0; f < framesOnWall; f++) {
         if (framesPlaced >= roomDesc.photoSlots || photoIndex >= photos.length) break;
@@ -63,11 +65,14 @@ export async function buildMuseum() {
         const photo = photos[photoIndex];
         const url = URL.createObjectURL(photo.blob);
         objectUrls.push(url);
-        const frame = createFrame({
-          textureUrl: url,
-          photoWidth: photo.width,
-          photoHeight: photo.height,
-        });
+
+        // Feature walls get a large landscape frame covering most of the wall
+        const frameOpts = { textureUrl: url, photoWidth: photo.width, photoHeight: photo.height };
+        if (isFeatureWall) {
+          frameOpts.maxFrameWidth = Math.min(ws.segWidth - 1.5, 7.0);
+          frameOpts.maxFrameHeight = Math.min(roomDesc.height - 2.5, 4.0);
+        }
+        const frame = createFrame(frameOpts);
 
         // Position frame on the wall
         const framePos = ws.mesh.position.clone();
@@ -79,14 +84,14 @@ export async function buildMuseum() {
             framePos.z += (f === 0 ? -offsetAmount : offsetAmount);
           }
         }
-        framePos.y = 1.6;
+        framePos.y = roomDesc.height * 0.38;
 
         frame.position.copy(framePos);
         frame.rotation.copy(ws.mesh.rotation);
 
-        // Push frame slightly off the wall
+        // Push frame off the wall surface (half wall thickness + small gap)
         const wallNormal = new THREE.Vector3(0, 0, 1).applyEuler(ws.mesh.rotation);
-        frame.position.add(wallNormal.multiplyScalar(0.03));
+        frame.position.add(wallNormal.multiplyScalar(0.13));
 
         group.add(frame);
 
@@ -99,6 +104,11 @@ export async function buildMuseum() {
         framesPlaced++;
       }
     }
+
+    // Overhead room light for general brightness
+    const roomLight = new THREE.PointLight(0xfff5e6, 1.0, 20, 1);
+    roomLight.position.set(0, roomDesc.height - 0.3, 0);
+    group.add(roomLight);
 
     // Collect wall meshes for collision
     for (const ws of wallSegments) {

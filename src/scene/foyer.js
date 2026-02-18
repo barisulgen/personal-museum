@@ -79,9 +79,17 @@ export function createFoyer(photoCount, foyerDescriptor) {
     width: 2048,
     height: 256,
   });
-  const titleMat = new THREE.MeshStandardMaterial({ map: titleTexture, transparent: true });
+  const titleMat = new THREE.MeshStandardMaterial({
+    map: titleTexture,
+    transparent: true,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -1,
+  });
   const titleMesh = new THREE.Mesh(new THREE.PlaneGeometry(8, 1.5), titleMat);
-  titleMesh.position.set(0, FOYER_HEIGHT * 0.65, -FOYER_DEPTH / 2 + 0.05);
+  titleMesh.position.set(0, FOYER_HEIGHT * 0.65, -FOYER_DEPTH / 2 + 0.25);
+  titleMesh.renderOrder = 1;
   group.add(titleMesh);
 
   // Exhibit info on a side wall
@@ -94,10 +102,18 @@ export function createFoyer(photoCount, foyerDescriptor) {
     height: 128,
     color: '#a09080',
   });
-  const infoMat = new THREE.MeshStandardMaterial({ map: infoTexture, transparent: true });
+  const infoMat = new THREE.MeshStandardMaterial({
+    map: infoTexture,
+    transparent: true,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -1,
+  });
   const infoMesh = new THREE.Mesh(new THREE.PlaneGeometry(5, 0.8), infoMat);
-  infoMesh.position.set(-FOYER_WIDTH / 2 + 0.05, 1.6, 0);
+  infoMesh.position.set(-FOYER_WIDTH / 2 + 0.25, 1.6, 0);
   infoMesh.rotation.y = Math.PI / 2;
+  infoMesh.renderOrder = 1;
   group.add(infoMesh);
 
   // Central bench

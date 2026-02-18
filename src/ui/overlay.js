@@ -1,5 +1,5 @@
 import { handleUpload } from './upload.js';
-import { getPhotoCount } from '../storage/db.js';
+import { getPhotoCount, clearAllPhotos } from '../storage/db.js';
 
 let onStartTour = null;
 let photoCount = 0;
@@ -16,6 +16,7 @@ export function initOverlay({ onStart }) {
       <input type="file" id="file-input" accept="image/*" multiple />
       <p class="photo-count" id="photo-count"></p>
       <button id="start-btn" disabled>Start the Tour</button>
+      <button class="mute-btn" id="reset-btn" style="display:none">Reset Photos</button>
       <button class="mute-btn" id="mute-btn">♪ Music: On</button>
     </div>
   `;
@@ -23,6 +24,7 @@ export function initOverlay({ onStart }) {
   const uploadBtn = document.getElementById('upload-btn');
   const fileInput = document.getElementById('file-input');
   const startBtn = document.getElementById('start-btn');
+  const resetBtn = document.getElementById('reset-btn');
   const muteBtn = document.getElementById('mute-btn');
 
   uploadBtn.addEventListener('click', () => fileInput.click());
@@ -38,6 +40,12 @@ export function initOverlay({ onStart }) {
     if (photoCount > 0 && onStartTour) {
       onStartTour();
     }
+  });
+
+  resetBtn.addEventListener('click', async () => {
+    await clearAllPhotos();
+    photoCount = 0;
+    updatePhotoCount();
   });
 
   // Mute toggle
@@ -62,10 +70,13 @@ export function initOverlay({ onStart }) {
 function updatePhotoCount() {
   const el = document.getElementById('photo-count');
   const startBtn = document.getElementById('start-btn');
+  const resetBtn = document.getElementById('reset-btn');
   if (photoCount === 0) {
     el.textContent = 'No photos yet';
+    resetBtn.style.display = 'none';
   } else {
     el.textContent = `${photoCount} photo${photoCount !== 1 ? 's' : ''} uploaded`;
+    resetBtn.style.display = 'inline-block';
   }
   startBtn.disabled = photoCount === 0;
 }

@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
-const FRAME_DEPTH = 0.05;
-const MAT_WIDTH = 0.04;    // white mat border
-const FRAME_BORDER = 0.06; // frame molding width
+const FRAME_DEPTH = 0.06;
+const MAT_WIDTH = 0.06;    // white mat border
+const FRAME_BORDER = 0.08; // frame molding width
 const FRAME_COLOR = 0x3e2c1a; // dark wood
 
 /**
@@ -11,11 +11,11 @@ const FRAME_COLOR = 0x3e2c1a; // dark wood
  * @param {string} opts.textureUrl - URL for the photo texture
  * @param {number} opts.photoWidth - original photo width in pixels
  * @param {number} opts.photoHeight - original photo height in pixels
- * @param {number} opts.maxFrameWidth - max width for the frame in world units (default 1.8)
- * @param {number} opts.maxFrameHeight - max height for the frame in world units (default 1.4)
+ * @param {number} opts.maxFrameWidth - max width for the frame in world units (default 4.0)
+ * @param {number} opts.maxFrameHeight - max height for the frame in world units (default 3.0)
  * @returns {THREE.Group}
  */
-export function createFrame({ textureUrl, photoWidth, photoHeight, maxFrameWidth = 1.8, maxFrameHeight = 1.4 }) {
+export function createFrame({ textureUrl, photoWidth, photoHeight, maxFrameWidth = 4.0, maxFrameHeight = 3.0 }) {
   const group = new THREE.Group();
 
   // Calculate photo dimensions to fit within max bounds, preserving aspect ratio

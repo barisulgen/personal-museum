@@ -11,15 +11,13 @@ const canvas = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 
 // Scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf5f0e8);
-scene.fog = new THREE.Fog(0xf5f0e8, 10, 40);
+scene.fog = new THREE.Fog(0xf5f0e8, 15, 50);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -49,49 +47,69 @@ async function init() {
   animate();
 }
 
+function showLoading() {
+  document.getElementById('loading').classList.add('visible');
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.remove('visible');
+}
+
 async function startTour() {
   hideOverlay();
+  showLoading();
 
-  // Clean up previous museum
-  if (museumGroup) {
-    scene.remove(museumGroup);
-    museumGroup.traverse((child) => {
-      if (child.isMesh) {
-        child.geometry?.dispose();
-        if (child.material) {
-          if (Array.isArray(child.material)) {
-            child.material.forEach((m) => { m.map?.dispose(); m.dispose(); });
-          } else {
-            child.material.map?.dispose();
-            child.material.dispose();
+  // Let the loading screen render before heavy work
+  await new Promise((r) => setTimeout(r, 50));
+
+  try {
+    // Clean up previous museum
+    if (museumGroup) {
+      scene.remove(museumGroup);
+      museumGroup.traverse((child) => {
+        if (child.isMesh) {
+          child.geometry?.dispose();
+          if (child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach((m) => { m.map?.dispose(); m.dispose(); });
+            } else {
+              child.material.map?.dispose();
+              child.material.dispose();
+            }
           }
         }
-      }
-    });
-    objectUrls.forEach((url) => URL.revokeObjectURL(url));
-    objectUrls = [];
-  }
+      });
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+      objectUrls = [];
+    }
 
-  // Build museum
-  const result = await buildMuseum();
-  museumGroup = result.museumGroup;
-  objectUrls = result.objectUrls;
-  scene.add(museumGroup);
-  collisionCheck = createCollisionChecker(result.collisionMeshes);
+    // Build museum
+    const result = await buildMuseum();
+    museumGroup = result.museumGroup;
+    objectUrls = result.objectUrls;
+    scene.add(museumGroup);
+    collisionCheck = createCollisionChecker(result.collisionMeshes);
 
-  // Reset player to foyer center
-  camera.position.set(0, 1.6, 0);
-  camera.rotation.set(0, 0, 0);
-  player.euler.set(0, 0, 0, 'YXZ');
+    // Reset player to foyer center
+    camera.position.set(0, 1.6, 0);
+    camera.rotation.set(0, 0, 0);
+    player.euler.set(0, 0, 0, 'YXZ');
 
-  // Fullscreen + pointer lock
-  try {
-    await canvas.requestFullscreen();
+    hideLoading();
+
+    // Fullscreen + pointer lock
+    try {
+      await canvas.requestFullscreen();
+    } catch (e) {
+      // Fullscreen may fail — continue anyway
+    }
+    player.lock();
+    inTour = true;
   } catch (e) {
-    // Fullscreen may fail — continue anyway
+    console.error('Failed to start tour:', e);
+    hideLoading();
+    showOverlay();
   }
-  player.lock();
-  inTour = true;
 }
 
 function exitTour() {

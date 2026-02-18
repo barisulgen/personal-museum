@@ -4,6 +4,7 @@ const WALL_COLOR = 0xf5f0e8;     // warm off-white
 const FLOOR_COLOR = 0x3b2f1e;    // dark hardwood
 const CEILING_COLOR = 0xfaf6f0;  // slightly lighter than walls
 const BASEBOARD_COLOR = 0x2a2018; // dark strip
+const WALL_THICKNESS = 0.2;      // 20cm thick walls
 
 /**
  * Create a single room.
@@ -12,14 +13,14 @@ const BASEBOARD_COLOR = 0x2a2018; // dark strip
  * @param {number} opts.depth   - room depth (Z axis)
  * @param {number} opts.height  - room height (Y axis)
  * @param {Array}  opts.doorways - array of { wall: 'north'|'south'|'east'|'west', position: number, width: number }
- * @returns {{ group: THREE.Group, wallSegments: Array<{ mesh, wall, start, end }> }}
+ * @returns {{ group: THREE.Group, wallSegments: Array<{ mesh, wall, segWidth }> }}
  */
 export function createRoom({ width, depth, height, doorways = [] }) {
   const group = new THREE.Group();
   const wallSegments = [];
-  const wallMat = new THREE.MeshStandardMaterial({ color: WALL_COLOR, side: THREE.DoubleSide });
-  const floorMat = new THREE.MeshStandardMaterial({ color: FLOOR_COLOR });
-  const ceilMat = new THREE.MeshStandardMaterial({ color: CEILING_COLOR });
+  const wallMat = new THREE.MeshStandardMaterial({ color: WALL_COLOR });
+  const floorMat = new THREE.MeshStandardMaterial({ color: FLOOR_COLOR, side: THREE.DoubleSide });
+  const ceilMat = new THREE.MeshStandardMaterial({ color: CEILING_COLOR, side: THREE.DoubleSide });
   const baseboardMat = new THREE.MeshStandardMaterial({ color: BASEBOARD_COLOR });
 
   // Floor
@@ -49,7 +50,7 @@ export function createRoom({ width, depth, height, doorways = [] }) {
     for (const seg of segments) {
       if (seg.isDoorway) continue;
 
-      const geom = new THREE.PlaneGeometry(seg.width, height);
+      const geom = new THREE.BoxGeometry(seg.width, height, WALL_THICKNESS);
       const mesh = new THREE.Mesh(geom, wallMat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
@@ -66,8 +67,8 @@ export function createRoom({ width, depth, height, doorways = [] }) {
       group.add(mesh);
       wallSegments.push({ mesh, wall: wallDef.name, segWidth: seg.width });
 
-      // Baseboard
-      const bbGeom = new THREE.PlaneGeometry(seg.width, 0.12);
+      // Baseboard (slightly thicker than wall so it protrudes, raised above floor)
+      const bbGeom = new THREE.BoxGeometry(seg.width, 0.10, WALL_THICKNESS + 0.03);
       const bb = new THREE.Mesh(bbGeom, baseboardMat);
       bb.position.copy(mesh.position);
       bb.position.y = 0.06;
@@ -79,7 +80,7 @@ export function createRoom({ width, depth, height, doorways = [] }) {
     for (const dw of wallDoorways) {
       const topH = height - dw.height;
       if (topH <= 0) continue;
-      const geom = new THREE.PlaneGeometry(dw.width, topH);
+      const geom = new THREE.BoxGeometry(dw.width, topH, WALL_THICKNESS);
       const mesh = new THREE.Mesh(geom, wallMat);
       const offset = dw.position - wallDef.length / 2;
       if (wallDef.axis === 'x') {
