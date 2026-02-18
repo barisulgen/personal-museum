@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { initOverlay, showOverlay, hideOverlay } from './ui/overlay.js';
+import { initAudio } from './ui/audio.js';
 
 const canvas = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -26,6 +27,8 @@ initOverlay({
     console.log('Starting tour...');
   },
 });
+
+initAudio();
 
 function animate() {
   requestAnimationFrame(animate);
