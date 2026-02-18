@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { initOverlay, showOverlay, hideOverlay } from './ui/overlay.js';
 
 const canvas = document.getElementById('canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -16,6 +17,14 @@ window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+initOverlay({
+  onStart: () => {
+    hideOverlay();
+    // Tour entry logic will be added in later tasks
+    console.log('Starting tour...');
+  },
 });
 
 function animate() {
